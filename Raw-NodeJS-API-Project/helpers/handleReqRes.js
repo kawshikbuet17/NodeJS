@@ -73,27 +73,6 @@ handler.handleReqRes = (req, res)=>{
     //chosenHandler will be a function
     const chosenHandler = routes[trimmedPath] ?  routes[trimmedPath] : notFoundHandler;
 
-    //call chosenHandler
-    //pass all the combined properties of request
-    //receive callback from the handler. here which are statusCode and payload
-    chosenHandler(requestProperties, (statusCode, payload)=>{
-        //if statusCode is number, then ok
-        //else set statusCode 500
-        statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
-        
-        //if payload is received as object, then ok
-        //else set an empty payload
-        payload = typeof(payload) === 'object' ? payload : {};
-
-        //stringify payload
-        const payloadString = JSON.stringify(payload);
-
-        //return the final response
-        //set statusCode in response
-        res.writeHead(statusCode);
-        //set payloadString in response
-        res.end(payloadString);
-    });
 
     req.on('data', (buffer)=>{
         realData += decoder.write(buffer);
@@ -101,6 +80,28 @@ handler.handleReqRes = (req, res)=>{
     req.on('end', ()=>{
         realData += decoder.end();
         console.log(realData);
+
+        //call chosenHandler
+        //pass all the combined properties of request
+        //receive callback from the handler. here which are statusCode and payload
+        chosenHandler(requestProperties, (statusCode, payload)=>{
+            //if statusCode is number, then ok
+            //else set statusCode 500
+            statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
+            
+            //if payload is received as object, then ok
+            //else set an empty payload
+            payload = typeof(payload) === 'object' ? payload : {};
+
+            //stringify payload
+            const payloadString = JSON.stringify(payload);
+
+            //return the final response
+            //set statusCode in response
+            res.writeHead(statusCode);
+            //set payloadString in response
+            res.end(payloadString);
+        });
 
         //response handle
         res.end('Hello World');
