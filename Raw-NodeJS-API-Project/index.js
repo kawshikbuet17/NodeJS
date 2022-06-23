@@ -1,20 +1,16 @@
 //dependencies
 const http = require('http');
 const {handleReqRes} = require('./helpers/handleReqRes');
+const environment = require('./helpers/environments');
 
 //app object - module scaffolding
 const app = {};
 
-//configuration
-app.config = {
-    port: 3000
-};
-
 //create server
 app.createServer = ()=>{
     const server = http.createServer(app.handleReqRes);
-    server.listen(app.config.port, ()=>{
-        console.log(`listening to port ${app.config.port}`);
+    server.listen(environment.port, ()=>{
+        console.log(`listening to port ${environment.port}`);
     });
 };
 
@@ -25,5 +21,6 @@ app.handleReqRes = handleReqRes;
 app.createServer();
 
 
-//use `nodemon index` to run instead of `node index`, then server need not to be run each time after editing
-//use postman / browser and go to http://localhost:3000
+//use postman / browser and go to http://localhost:<Environment Variable Selected Port>
+//to run use `npm run staging` or `npm run production`
+//to be more specific run `SET NODE_ENV=staging&nodemon index`

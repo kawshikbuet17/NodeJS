@@ -16,10 +16,13 @@ A RESTFul API to monitor up or down time of user defined links
 * Edit/Delete links & rate limit
 * Check up/down time
 
-## Steps
-* Create a folder
-* Open that folder
-* Open terminal
-* Run `npm install`
-* Run `npm install -g nodemon`
-* Install Postman / Use browser extension of Postman
+## Tools
+* node, npm
+* postman desktop client
+
+## Commands
+* `npm init` (initialize a project from scratch)
+* `npm install` (install from package.json file)
+* `npm install -g nodemon` (to avoid running server after every changes, `nodemon index` instead of `node index`)
+* `npm run <Any Script written in package.json "scripts">`
+such as `npm run staging`, `npm run production`, `npm start` (exceptional), `npm run start`
