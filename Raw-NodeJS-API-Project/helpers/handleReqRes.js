@@ -1,6 +1,9 @@
 //dependencies
 const url = require('url');
 const {StringDecoder} = require('string_decoder');
+const routes = require('../routes');
+const {notFoundHandler} = require('../handlers/routeHandlers/notFoundHandler');
+
 
 //module scaffolding
 const handler = {};
@@ -44,6 +47,16 @@ handler.handleReqRes = (req, res)=>{
     const headersObject = req.headers;
     console.log(headersObject);
 
+    //combine all these
+    const requestProperties = {
+        parsedUrl,
+        path,
+        trimmedPath,
+        method,
+        queryStringObject,
+        headersObject,
+    };
+
     //GET request data is sent as query string
     //but in POST request data is sent with request body
     //if in frontend, a form is filled up, the form data is sent as request body
@@ -53,6 +66,35 @@ handler.handleReqRes = (req, res)=>{
     //to test this, provide data from postman (as body and POST request)
     const decoder = new StringDecoder('utf-8');
     let realData = '';
+
+    //chose for which handler to call for a request
+    //if path is found in routes, then go thereby
+    //otherwise go to notFoundHandler
+    //chosenHandler will be a function
+    const chosenHandler = routes[trimmedPath] ?  routes[trimmedPath] : notFoundHandler;
+
+    //call chosenHandler
+    //pass all the combined properties of request
+    //receive callback from the handler. here which are statusCode and payload
+    chosenHandler(requestProperties, (statusCode, payload)=>{
+        //if statusCode is number, then ok
+        //else set statusCode 500
+        statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
+        
+        //if payload is received as object, then ok
+        //else set an empty payload
+        payload = typeof(payload) === 'object' ? payload : {};
+
+        //stringify payload
+        const payloadString = JSON.stringify(payload);
+
+        //return the final response
+        //set statusCode in response
+        res.writeHead(statusCode);
+        //set payloadString in response
+        res.end(payloadString);
+    });
+
     req.on('data', (buffer)=>{
         realData += decoder.write(buffer);
     });
