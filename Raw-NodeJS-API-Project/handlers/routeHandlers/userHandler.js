@@ -1,6 +1,7 @@
 //dependencies
 const data = require('../../lib/data');
 const {hash} = require('../../helpers/utilities');
+const {parseJSON} = require('../../helpers/utilities');
 const { handleReqRes } = require("../../helpers/handleReqRes");
 
 //module scaffolding
@@ -101,7 +102,34 @@ handler._users.post = (requestProperties, callback) => {
 };
 
 handler._users.get = (requestProperties, callback) => {
-    callback(200);
+    //http://localhost:3000/user?phone=01516763KKP GET method
+    //if this is requested, we will send the 01516763KKP user data to client as response
+    //phone=01516763KKP is called the query string
+    //check the phone number of the query string is valid
+
+    const phone = typeof (requestProperties.queryStringObject.phone) === 'string' && requestProperties.queryStringObject.phone.trim().length === 11 ? requestProperties.queryStringObject.phone : false;
+
+    if(phone){
+        //lookup the user
+        data.read('users', phone, (err, u)=>{
+            //const user = u; //object shouldn't be copied like this
+
+            //this is called spread operator
+            //this copies the data immutably
+            //object must be single level (not object in object)
+            const user = { ...parseJSON(u)};
+
+            if(!err && user){
+                delete user.password;
+                callback(200, user);
+            }
+        });
+    }else{
+        callback(404, {
+            'error': 'Requested user was not found',
+        });
+    }
+
 };
 
 handler._users.put = (requestProperties, callback) => {
