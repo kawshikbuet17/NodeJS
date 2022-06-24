@@ -202,7 +202,38 @@ handler._users.put = (requestProperties, callback) => {
 };
 
 handler._users.delete = (requestProperties, callback) => {
+    //Testing
+    //http://localhost:3000/user?phone=01516763KKP DELETE method (postman)
 
+    //check the phone number of the query string is valid
+    const phone = typeof (requestProperties.queryStringObject.phone) === 'string' && requestProperties.queryStringObject.phone.trim().length === 11 ? requestProperties.queryStringObject.phone : false;
+
+    if(phone){
+        //lookup the user in file system .data
+        data.read('users', phone, (err, userData)=>{
+            if(!err && userData){
+                data.delete('users', phone, (err2)=>{
+                    if(!err2){
+                        callback(200, {
+                            'message': 'User was successfully deleted',
+                        });
+                    }else{
+                        callback(500, {
+                            'error':'There was a server side error',
+                        });
+                    }
+                });
+            }else{
+                callback(500, {
+                    'error': 'There was a server side error',
+                })
+            }
+        });
+    }else{
+        callback(400, {
+            'error': 'There was a problem in your request',
+        });
+    }
 };
 
 
