@@ -24,9 +24,16 @@ const app = {};
 
 //testing file update
 //update a file which is previously written
-data.update('test', 'newFile', {'name':'kawshikbuet17', 'studentid':'1705043'}, (err)=>{
-    console.log(err);
+// data.update('test', 'newFile', {'name':'kawshikbuet17', 'studentid':'1705043'}, (err)=>{
+//     console.log(err);
+// });
+
+
+//testing file delete
+data.delete('test', 'newFile', (err)=>{
+    console.log('error = ', err);
 });
+
 
 //create server
 app.createServer = ()=>{
