@@ -10,9 +10,16 @@ const app = {};
 //testing file system
 //manually create .data/test folder
 //our code can create file, not folder till now
-data.create('test', 'newFile', {'name':'KKP', 'dept':'BUET CSE'}, (err)=>{
-    console.log('error is', err);
-});
+// data.create('test', 'newFile', {'name':'KKP', 'dept':'BUET CSE'}, (err)=>{
+//     console.log('error is', err);
+// });
+
+//testing file read
+//reading from previously created file .data/test/newFile
+data.read('test', 'newFile', (err, data)=>{
+    console.log('error = ', err);
+    console.log('data = ', data);
+})
 
 //create server
 app.createServer = ()=>{
