@@ -3,6 +3,7 @@ const url = require('url');
 const {StringDecoder} = require('string_decoder');
 const routes = require('../routes');
 const {notFoundHandler} = require('../handlers/routeHandlers/notFoundHandler');
+const {parseJSON} = require('./utilities');
 
 
 //module scaffolding
@@ -79,7 +80,17 @@ handler.handleReqRes = (req, res)=>{
     });
     req.on('end', ()=>{
         realData += decoder.end();
-        console.log(realData);
+        // console.log(realData);
+
+        //add realData to requestProperties
+        //the data is to add as body
+        //realData is string
+        //we have to parse it to json
+        //user can provide wrong data in req
+        //so we have to handle it also
+        //if error, then we will get blank object
+        //if correct, then we will get valid json object
+        requestProperties.body = parseJSON(realData);
 
         //call chosenHandler
         //pass all the combined properties of request
