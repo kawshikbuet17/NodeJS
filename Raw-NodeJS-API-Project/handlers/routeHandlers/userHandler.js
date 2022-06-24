@@ -62,6 +62,8 @@ handler._users.post = (requestProperties, callback) => {
                     Test Input from Postman
                     http://localhost:3000/user
                     method POST
+                    type the following Object in body section
+                    as RAW and JSON
 
                     {
                         "firstName": "Kawshik",
