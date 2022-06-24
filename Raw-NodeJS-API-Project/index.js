@@ -30,9 +30,9 @@ const app = {};
 
 
 //testing file delete
-data.delete('test', 'newFile', (err)=>{
-    console.log('error = ', err);
-});
+// data.delete('test', 'newFile', (err)=>{
+//     console.log('error = ', err);
+// });
 
 
 //create server

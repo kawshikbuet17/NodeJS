@@ -97,6 +97,10 @@ handler.handleReqRes = (req, res)=>{
             const payloadString = JSON.stringify(payload);
 
             //return the final response
+
+            //usually response payload is sent as a string, but if we want to mention the type of payload, we have to set header
+            //this application.json will set the type of sending data to response is to json instead of string
+            res.setHeader('Content-Type', 'application/json');
             //set statusCode in response
             res.writeHead(statusCode);
             //set payloadString in response
