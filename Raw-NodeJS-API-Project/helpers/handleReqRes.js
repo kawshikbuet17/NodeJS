@@ -117,9 +117,6 @@ handler.handleReqRes = (req, res)=>{
             //set payloadString in response
             res.end(payloadString);
         });
-
-        //response handle
-        res.end('Hello World');
     });
 }
 
