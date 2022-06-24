@@ -133,7 +133,72 @@ handler._users.get = (requestProperties, callback) => {
 };
 
 handler._users.put = (requestProperties, callback) => {
+        /*
+        For testing
+        http://localhost:3000/user PUT method (postman)
+        as body (RAW, JSON)
+        {
+            "firstName": "Kawshik Kumar",
+            "lastName": "Paul",
+            "phone": "01516763KKP",
+            "password": "kkp new pswd"
+        }
+         */
 
+        //check the phone number is valid
+        const phone = typeof (requestProperties.body.phone) === 'string' && requestProperties.body.phone.trim().length === 11 ? requestProperties.body.phone : false;
+
+        const firstName = typeof (requestProperties.body.firstName) === 'string' && requestProperties.body.firstName.trim().length > 0 ? requestProperties.body.firstName : false;
+
+        const lastName = typeof (requestProperties.body.lastName) === 'string' && requestProperties.body.lastName.trim().length > 0 ? requestProperties.body.lastName : false;
+
+        const password = typeof (requestProperties.body.password) === 'string' && requestProperties.body.password.trim().length > 0 ? requestProperties.body.password : false;
+
+        if(phone){
+            if( firstName || lastName || password){
+                //lookup the user in our file .data
+                data.read('users', phone, (err, uData)=>{
+                    const userData = { ...parseJSON(uData)};
+                    if(!err && userData){
+                        if(firstName){
+                            userData.firstName = firstName;
+                        }
+                        if(lastName){
+                            userData.lastName = lastName;
+                        }
+                        if(password){
+                            userData.password = hash(password);
+                        }
+
+                        //store to file system .data
+                        data.update('users', phone, userData, (err2)=>{
+                            if(!err2){
+                                callback(200, {
+                                    'message': 'User was updated successfully',
+                                });
+                            }else{
+                                callback(400, {
+                                    'error': 'There is a problem in server side',
+                                });
+                            }
+                        });
+                    }else{
+                        callback(400, {
+                            'error': 'You have a problem in your request',
+                        });
+                    }
+                });
+
+            }else{
+                callback(400, {
+                    'error': 'You have a problem in your request',
+                });
+            }
+        }else{
+            callback(400, {
+                'error': 'Invalid phone number. Please try again',
+            });
+        }
 };
 
 handler._users.delete = (requestProperties, callback) => {
