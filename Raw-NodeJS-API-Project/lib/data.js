@@ -41,4 +41,42 @@ lib.read = (dir, file, callback)=>{
     });
 }
 
+
+//update existing file
+//we have to read+write for update
+lib.update = (dir, file, data, callback)=>{
+    //file open before writing
+    fs.open(lib.basedir+dir+'/'+file+'.json', 'r+', (err, fileDescriptor)=>{
+        if(!err && fileDescriptor){
+            //convert data to string
+            const stringData = JSON.stringify(data);
+
+            //truncate the file
+            fs.ftruncate(fileDescriptor, (err1)=>{
+                if(!err1){
+                    //write to the file and close it
+                    fs.writeFile(fileDescriptor, stringData, (err2)=>{
+                        if(!err2){
+                            //close the file
+                            fs.close(fileDescriptor, (err3)=>{
+                                if(!err3){
+                                    callback(false);
+                                }else{
+                                    callback('Error closing file');
+                                }
+                            });
+                        }else{
+                            callback('Error writing to file');
+                        }
+                    });
+                }else{
+                    callback('Error truncating file');
+                }
+            });
+        }else{
+            console.log('Error updating. File May not exist');
+        }
+    });
+};
+
 module.exports = lib;

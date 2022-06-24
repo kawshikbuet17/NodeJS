@@ -16,10 +16,17 @@ const app = {};
 
 //testing file read
 //reading from previously created file .data/test/newFile
-data.read('test', 'newFile', (err, data)=>{
-    console.log('error = ', err);
-    console.log('data = ', data);
-})
+// data.read('test', 'newFile', (err, data)=>{
+//     console.log('error = ', err);
+//     console.log('data = ', data);
+// });
+
+
+//testing file update
+//update a file which is previously written
+data.update('test', 'newFile', {'name':'kawshikbuet17', 'studentid':'1705043'}, (err)=>{
+    console.log(err);
+});
 
 //create server
 app.createServer = ()=>{
