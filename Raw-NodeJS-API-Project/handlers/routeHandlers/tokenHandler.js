@@ -180,6 +180,39 @@ handler._token.put = (requestProperties, callback) => {
 
 handler._token.delete = (requestProperties, callback) => {
     
+    //Testing
+    //http://localhost:3000/token?id=knn5glkolpyh74lzv1mx DELETE method (postman)
+    //token file will be deleted
+
+    //check the token id of the query string is valid
+    const id = typeof (requestProperties.queryStringObject.id) === 'string' && requestProperties.queryStringObject.id.trim().length === 20 ? requestProperties.queryStringObject.id : false;
+
+    if(id){
+        //lookup the token in file system .data
+        data.read('tokens', id, (err, tokenData)=>{
+            if(!err && tokenData){
+                data.delete('tokens', id, (err2)=>{
+                    if(!err2){
+                        callback(200, {
+                            'message': 'Token was successfully deleted',
+                        });
+                    }else{
+                        callback(500, {
+                            'error':'There was a server side error',
+                        });
+                    }
+                });
+            }else{
+                callback(500, {
+                    'error': 'There was a server side error',
+                })
+            }
+        });
+    }else{
+        callback(400, {
+            'error': 'There was a problem in your request',
+        });
+    }
 };
 
 
