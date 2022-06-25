@@ -34,4 +34,24 @@ utilities.hash = (str) => {
     return false;
 };
 
+//create random string for token generation
+utilities.createRandomString = (strlength) => {
+    let length = strlength;
+    length = typeof(strlength) === 'number' && strlength > 0 ? strlength : false;
+
+    if(length){
+        let possibleCharacters = 'abcdefghijklmnopqrstuvwxyz1234567890';
+        let output = '';
+        for(let i=1; i<=length; i+=1){
+            let randomNumber = Math.random()*possibleCharacters.length;
+            randomNumber = Math.floor(randomNumber);
+            let randomCharacter = possibleCharacters.charAt(randomNumber);
+
+            output += randomCharacter;
+        }
+        return output;
+    }
+    return false;
+};
+
 module.exports = utilities;
