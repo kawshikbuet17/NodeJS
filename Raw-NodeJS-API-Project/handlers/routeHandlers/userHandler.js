@@ -2,7 +2,7 @@
 const data = require('../../lib/data');
 const {hash} = require('../../helpers/utilities');
 const {parseJSON} = require('../../helpers/utilities');
-const { handleReqRes } = require("../../helpers/handleReqRes");
+const tokenHandler = require('./tokenHandler');
 
 //module scaffolding
 const handler = {};
@@ -106,22 +106,39 @@ handler._users.get = (requestProperties, callback) => {
     //if this is requested, we will send the 01516763KKP user data to client as response
     //phone=01516763KKP is called the query string
     //check the phone number of the query string is valid
-
     const phone = typeof (requestProperties.queryStringObject.phone) === 'string' && requestProperties.queryStringObject.phone.trim().length === 11 ? requestProperties.queryStringObject.phone : false;
 
     if(phone){
-        //lookup the user
-        data.read('users', phone, (err, u)=>{
-            //const user = u; //object shouldn't be copied like this
+        //verify token
+        //token is given as an attribute of headersObject
+        /*
+            For testing (postman)
+            1. user must be created
+            2. must have unexpired token
+            3. provide token="token_id" as headers attribute
+        */
+        let token = typeof(requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
 
-            //this is called spread operator
-            //this copies the data immutably
-            //object must be single level (not object in object)
-            const user = { ...parseJSON(u)};
+        tokenHandler._token.verify(token, phone, (tokenId)=>{
+            if(tokenId){
+                //lookup the user
+                data.read('users', phone, (err, u)=>{
+                    //const user = u; //object shouldn't be copied like this
 
-            if(!err && user){
-                delete user.password;
-                callback(200, user);
+                    //this is called spread operator
+                    //this copies the data immutably
+                    //object must be single level (not object in object)
+                    const user = { ...parseJSON(u)};
+
+                    if(!err && user){
+                        delete user.password;
+                        callback(200, user);
+                    }
+                });
+            }else{
+                callback(403,{
+                    'error': 'Authentication failure',
+                });
             }
         });
     }else{
@@ -156,38 +173,57 @@ handler._users.put = (requestProperties, callback) => {
 
         if(phone){
             if( firstName || lastName || password){
-                //lookup the user in our file .data
-                data.read('users', phone, (err, uData)=>{
-                    const userData = { ...parseJSON(uData)};
-                    if(!err && userData){
-                        if(firstName){
-                            userData.firstName = firstName;
-                        }
-                        if(lastName){
-                            userData.lastName = lastName;
-                        }
-                        if(password){
-                            userData.password = hash(password);
-                        }
+                //verify token
+                //token is given as an attribute of headersObject
+                /*
+                    For testing (postman)
+                    1. user must be created
+                    2. must have unexpired token
+                    3. provide token="token_id" as headers attribute
+                */
+                let token = typeof(requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
 
-                        //store to file system .data
-                        data.update('users', phone, userData, (err2)=>{
-                            if(!err2){
-                                callback(200, {
-                                    'message': 'User was updated successfully',
+                tokenHandler._token.verify(token, phone, (tokenId)=>{
+                    if(tokenId){
+                        //lookup the user in our file .data
+                        data.read('users', phone, (err, uData)=>{
+                            const userData = { ...parseJSON(uData)};
+                            if(!err && userData){
+                                if(firstName){
+                                    userData.firstName = firstName;
+                                }
+                                if(lastName){
+                                    userData.lastName = lastName;
+                                }
+                                if(password){
+                                    userData.password = hash(password);
+                                }
+
+                                //store to file system .data
+                                data.update('users', phone, userData, (err2)=>{
+                                    if(!err2){
+                                        callback(200, {
+                                            'message': 'User was updated successfully',
+                                        });
+                                    }else{
+                                        callback(400, {
+                                            'error': 'There is a problem in server side',
+                                        });
+                                    }
                                 });
                             }else{
                                 callback(400, {
-                                    'error': 'There is a problem in server side',
+                                    'error': 'You have a problem in your request',
                                 });
                             }
                         });
                     }else{
-                        callback(400, {
-                            'error': 'You have a problem in your request',
+                        callback(403,{
+                            'error': 'Authentication failure',
                         });
                     }
                 });
+                
 
             }else{
                 callback(400, {
@@ -209,24 +245,42 @@ handler._users.delete = (requestProperties, callback) => {
     const phone = typeof (requestProperties.queryStringObject.phone) === 'string' && requestProperties.queryStringObject.phone.trim().length === 11 ? requestProperties.queryStringObject.phone : false;
 
     if(phone){
-        //lookup the user in file system .data
-        data.read('users', phone, (err, userData)=>{
-            if(!err && userData){
-                data.delete('users', phone, (err2)=>{
-                    if(!err2){
-                        callback(200, {
-                            'message': 'User was successfully deleted',
+        //verify token
+        //token is given as an attribute of headersObject
+        /*
+            For testing (postman)
+            1. user must be created
+            2. must have unexpired token
+            3. provide token="token_id" as headers attribute
+        */
+        let token = typeof(requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId)=>{
+            if(tokenId){
+                //lookup the user in file system .data
+                data.read('users', phone, (err, userData)=>{
+                    if(!err && userData){
+                        data.delete('users', phone, (err2)=>{
+                            if(!err2){
+                                callback(200, {
+                                    'message': 'User was successfully deleted',
+                                });
+                            }else{
+                                callback(500, {
+                                    'error':'There was a server side error',
+                                });
+                            }
                         });
                     }else{
                         callback(500, {
-                            'error':'There was a server side error',
-                        });
+                            'error': 'There was a server side error',
+                        })
                     }
                 });
             }else{
-                callback(500, {
-                    'error': 'There was a server side error',
-                })
+                callback(403,{
+                    'error': 'Authentication failure',
+                });
             }
         });
     }else{
