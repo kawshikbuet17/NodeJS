@@ -41,7 +41,7 @@ handler._check.post = (requestProperties, callback) => {
         in Header
         add token = token_id
      */
-    
+
     //validate inputs
     //validate protocol http or https
     let protocol = typeof(requestProperties.body.protocol) === 'string' && ['http', 'https'].indexOf(requestProperties.body.protocol) > -1 ? requestProperties.body.protocol : false;
@@ -83,7 +83,7 @@ handler._check.post = (requestProperties, callback) => {
                                     let checkId = createRandomString(20);
                                     let checkObject = {
                                         'id': checkId,
-                                        'userPhone': 'phone',
+                                        'userPhone': userPhone,
                                         'protocol': protocol,
                                         'url': url,
                                         'method': method,
@@ -147,6 +147,44 @@ handler._check.post = (requestProperties, callback) => {
 };
 
 handler._check.get = (requestProperties, callback) => {
+    /*
+        For Testing (postman)
+        1. user must be created previously
+        2. that user must have an unexpired token
+        http://localhost:3000/check?id=<check_id> GET method
+        token id as an attribute of Headers
+    */
+   
+    //check the token id of the query string is valid
+    const id = typeof (requestProperties.queryStringObject.id) === 'string' && requestProperties.queryStringObject.id.trim().length === 20 ? requestProperties.queryStringObject.id : false;
+
+    if(id){
+        //lookup the check
+        data.read('checks', id, (err, checkData)=>{
+            if(!err && checkData){
+                let token = typeof(requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
+                
+                tokenHandler._token.verify(token, parseJSON(checkData).userPhone, (tokenIsValid)=>{
+                    if(tokenIsValid){
+                        callback(200, parseJSON(checkData));
+                    }else{
+                        callback(403, {
+                            'error': 'Authentication failure',
+                        });
+                    }
+                });
+
+            }else{
+                callback(500, {
+                    'error': 'There was a server side error',
+                });
+            }
+        });
+    }else{
+        callback(400, {
+            'error': 'You have a problem in your request',
+        });
+    }
 };
 
 handler._check.put = (requestProperties, callback) => {
