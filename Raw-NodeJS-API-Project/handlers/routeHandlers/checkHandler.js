@@ -141,7 +141,7 @@ handler._check.post = (requestProperties, callback) => {
     }else{
         callback(400, {
             'error': 'You have a problem in your request',
-        })
+        });
     }
 
 };
@@ -188,6 +188,105 @@ handler._check.get = (requestProperties, callback) => {
 };
 
 handler._check.put = (requestProperties, callback) => {
+    /* 
+        For Testing (postman)
+        1. must have previously created user
+        2. user has unexpired token
+        3. must have a check 
+
+        http://localhost:3000/check PUT method
+
+        as token attribute of Headers
+        token = <token_id which is unexpired>
+
+        as Body and JSON
+        {
+            "id": "lqmomgvnpbstfn4j60we" <this is check id>,
+            "protocol": "https"
+        }
+    */
+
+    //check the check_id
+    const id = typeof (requestProperties.body.id) === 'string' && requestProperties.body.id.trim().length === 20 ? requestProperties.body.id : false;
+
+    //validate inputs
+    //validate protocol http or https
+    let protocol = typeof(requestProperties.body.protocol) === 'string' && ['http', 'https'].indexOf(requestProperties.body.protocol) > -1 ? requestProperties.body.protocol : false;
+
+    //validate url
+    let url = typeof(requestProperties.body.url) === 'string' &&  requestProperties.body.url.trim().length > 0 ? requestProperties.body.url : false;
+
+    //validate method
+    let method = typeof(requestProperties.body.method) === 'string' && ['GET', 'POST', 'PUT', 'DELETE'].indexOf(requestProperties.body.method) > -1 ? requestProperties.body.method : false;
+
+    //validate success codes
+    //in JS, type of array is object
+    //success codes is an array
+    let successCodes = typeof(requestProperties.body.successCodes) === 'object' && requestProperties.body.successCodes instanceof Array ? requestProperties.body.successCodes : false;
+
+    //validate timeout seconds
+    //check if integer
+    //check if in boundary [1,5] seconds
+    let timeoutSeconds = typeof(requestProperties.body.timeoutSeconds) === 'number' && requestProperties.body.timeoutSeconds % 1 === 0 && requestProperties.body.timeoutSeconds >= 1 && requestProperties.body.timeoutSeconds <= 5 ?  requestProperties.body.timeoutSeconds : false;
+
+    if(id){
+        if(protocol || url || method || successCodes || timeoutSeconds){
+            data.read('checks', id, (err1, checkData)=>{
+                if(!err1 && checkData){
+                let checkObject = parseJSON(checkData);
+                //client will provide token with the request
+                let token = typeof(requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
+                
+                tokenHandler._token.verify(token, checkObject.userPhone, (tokenIsValid)=>{
+                    if(tokenIsValid){
+                        if(protocol){
+                            checkObject.protocol = protocol;
+                        }
+                        if(url){
+                            checkObject.url = url;
+                        }
+                        if(method){
+                            checkObject.method = method;
+                        }
+                        if(successCodes){
+                            checkObject.successCodes = successCodes;
+                        }
+                        if(timeoutSeconds){
+                            checkObject.timeoutSeconds = timeoutSeconds;
+                        }
+
+                        //store the checkObject
+                        data.update('checks', id, checkObject, (err2)=>{
+                            if(!err2){
+                                callback(200);
+                            }else{
+                                callback(500, {
+                                    'error': 'There was a server side error',
+                                });
+                            }
+                        });
+                    }else{
+                        callback(403, {
+                            'error': 'Authentication error',
+                        });
+                    }
+                });
+                }else{
+                    callback(500, {
+                        'error': 'There was a problem in the server side',
+                    });
+                }
+            });
+        }else{
+            callback(400, {
+                'error': 'You must provide at least one field to update',
+            });
+        }
+    }else{
+        callback(400, {
+            'error': 'You have a problem in your request',
+        });
+    }
 };
 
 handler._check.delete = (requestProperties, callback) => {
