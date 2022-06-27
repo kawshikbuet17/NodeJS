@@ -3,6 +3,7 @@ const http = require('http');
 const {handleReqRes} = require('./helpers/handleReqRes');
 const environment = require('./helpers/environments');
 const data = require('./lib/data');
+const { sendTwilioSms } = require('./helpers/notifications');
 
 //app object - module scaffolding
 const app = {};
@@ -34,6 +35,13 @@ const app = {};
 //     console.log('error = ', err);
 // });
 
+
+//testing twilio
+//provide here real phone number
+//last 3 digit is hidden by me for privacy concern
+sendTwilioSms('01516763KKP', 'Hello World, Twilio API working successfully. This is message from KKP', (err)=>{
+    console.log('this is twilio error', err);
+});
 
 //create server
 app.createServer = ()=>{
