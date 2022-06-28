@@ -11,8 +11,8 @@ environments.staging = {
     maxChecks: 5,
     twilio: {
         fromPhone: '+19806552385',
-        accountSid: 'ACbba5ba208f01aad166e59a82e529f54c',
-        authToken: '3a2fec29c6aeb1ac43c489bd116cbc73',
+        accountSid: '<Confidential>',
+        authToken: '<Confidential>',
     }
 };
 
@@ -24,8 +24,8 @@ environments.production = {
     maxChecks: 5,
     twilio: {
         fromPhone: '+19806552385',
-        accountSid: 'ACbba5ba208f01aad166e59a82e529f54c',
-        authToken: '3a2fec29c6aeb1ac43c489bd116cbc73',
+        accountSid: '<Confidential>',
+        authToken: '<Confidential>',
     }
 }
 
